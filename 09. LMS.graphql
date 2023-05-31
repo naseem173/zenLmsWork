@@ -186,10 +186,10 @@ type Assessment {
 }
 
 type AssessmentType {
-  QUIZ
-  SURVEY
-  ASSIGNMENT
-  EXAM
+  quiz: LMS_Quiz_Question
+  survey: String
+  Assignment: String
+  Exam: String
 }
 
 type Course {
@@ -275,12 +275,12 @@ type LMS_Question_Response @model
 type learnerManagement_Learner {
   name: String!
   email: String!
-  mobile: String!
+  mobile: Int!
   password: String!
   sendEmailToUser: Boolean @default(value: "false")
 }
 
-#userManagement
+#user Management
 type userManagement_admin @model 
 @auth(
     rules: [
@@ -333,7 +333,13 @@ type userManagement_Instruction @model
 
 }
 
-type userManagement_Affiliate {
+type userManagement_Affiliate @auth(
+    rules: [
+      { allow: owner } # Defaults to use the "owner" field
+      { allow: private, operations: [update, read] }
+    ]
+  )
+{
   name: String!
   email: String!
   mobile: Int!
