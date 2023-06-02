@@ -51,7 +51,7 @@ type LMS_Course @model @searchable {
 
 #Drip Scheduling
 type LMS_Drip_Schedule @model {
-  enableDripping: Boolean # Enabling the Dripping option
+  enableDripping: Boolean @default(value: "false") # Enabling the Dripping option
   dripType: DripType # Specify the data type for dripType
 }
 
@@ -114,14 +114,13 @@ type ChooseCourse {
 
 type Revenue {
   id: ID!
+  name: String!
   courses: [LMS_Course] @hasMany(relationName: "RevenueCourses")
   payoutPercentage: Float!
-  date: String!
 }
 
 type Affiliate {
   id: ID!
-  email: String!
   name: String!
   courses: [LMS_Course] @hasMany(relationName: "affiliateCourses")
 }
@@ -129,8 +128,7 @@ type Affiliate {
 #pricing
 
 type Pricing @model {
-  primaryPricing: Boolean # Set the initial pricing option that will display on landing page
-  pricingType: pricingType #specify the correct option
+  pricing_Type: pricingType #specify the correct option
 }
 
 enum pricingType {
@@ -144,6 +142,29 @@ type SetAdditionalPricingOption {
   id: ID!
   label: String
   price: Float!
+}
+
+enum DurationUnit {
+  DAYS
+  MONTHS
+}
+
+type Subscription{
+  amount: Float!
+  paidEveryMonth: Int
+  freeTrialPeriod: Boolean @default(value: "false")
+  freeTrialPeriodDurationUnit: DurationUnit
+  freeTrialPeriodDuration: Int
+  customFirstPaymentEnabling: Boolean
+  customFirstPaymentPrice: Float
+
+}
+
+type MonthlyPaymentPlan{
+  pricePerPayment: Int!
+  totalMonths: Int!
+  enrollmentDuration: Int!
+  buyButtonTextLabel: String!
 }
 
 #publish
@@ -164,10 +185,11 @@ type LearningContent {
   id: ID!
   courseId: ID! @index(name: "learningContentByCourse")
   course: [LMS_Course]! @belongsTo(fields: ["courseId"])
+  duration: LMS_Course_Duration
   type: LearningContentType!
 }
 
-type LearningContentType {
+enum LearningContentType {
   VIDEO
   PDF
   TEXT
@@ -176,6 +198,14 @@ type LearningContentType {
   PRESENTATION
   MULTIMEDIA
   LIVE
+}
+
+type newLesson{
+  id: ID!
+  title: String!
+  content: String!
+  uploadAudio: String!
+  draft: Boolean
 }
 
 type Assessment {
@@ -187,10 +217,42 @@ type Assessment {
 
 type AssessmentType {
   quiz: LMS_Quiz_Question
-  survey: String
+  survey: LMS_Survey
   Assignment: String
-  Exam: String
 }
+type LMS_Survey{
+  id: ID!
+  title: String!
+  content: String!
+  questions: [SurveyQuestion!]!
+}
+
+type SurveyQuestion {
+  id: ID!
+  text: String!
+  options: [SurveyOption!]!
+  answer: String
+}
+
+type SurveyOption {
+  id: ID!
+  questionId: ID!
+  key: Int
+  content: String!
+}
+
+type SurveyResponse {
+  userId: ID!
+  surveyId: ID!
+  answers: [SurveyAnswer!]!
+  totalScore: Int
+}
+
+type SurveyAnswer {
+  questionId: ID!
+  selectedOptionId: ID!
+}
+
 
 type Course {
   id: ID!
@@ -206,6 +268,7 @@ type LessonSetting{
   isPrerequisite: Boolean!
   discussionEnabled: Boolean!
   isVideoDownloadable: Boolean!
+  lessonIconAndLabel: String
 
 }
 
